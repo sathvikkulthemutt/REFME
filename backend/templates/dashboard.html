@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefMe Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #1a1a1a, #2d3436, #130f40, #000000);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .welcome-text {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #00ff87, #60efff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0,255,135,0.3);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #00ff87, #60efff);
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 135, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        .add-link-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00ff87;
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.3);
+        }
+
+        label {
+            position: absolute;
+            left: 12px;
+            top: -10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0 8px;
+            font-size: 14px;
+            color: #00ff87;
+            border-radius: 4px;
+        }
+
+        .links-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .link-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 255, 135, 0.2);
+            border-color: #00ff87;
+        }
+
+        .link-card h3 {
+            margin: 0 0 1rem 0;
+            color: #00ff87;
+            font-size: 1.2rem;
+        }
+
+        .link-card a {
+            color: #60efff;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .link-card a:hover {
+            text-decoration: underline;
+        }
+
+        .link-meta {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .link-meta span {
+            display: inline-block;
+            margin-right: 1rem;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300ff87' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .cyber-dots {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .cyber-dots::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle, #00ff87 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .link-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .notification.success {
+            background: rgba(0, 255, 135, 0.1);
+            border-left: 4px solid #00ff87;
+            box-shadow: 0 5px 15px rgba(0, 255, 135, 0.2);
+        }
+
+        .notification.error {
+            background: rgba(255, 0, 85, 0.1);
+            border-left: 4px solid #ff0055;
+            box-shadow: 0 5px 15px rgba(255, 0, 85, 0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.7);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .loading-state::after {
+            content: '...';
+            animation: loadingDots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes loadingDots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-dots"></div>
+    <div id="notification" class="notification"></div>
+    <div class="dashboard-container">
+        <header class="header">
+            <h1 class="welcome-text">Welcome, {{ username }}!</h1>
+            <button onclick="logout()" class="btn btn-secondary">Terminate Session</button>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="add-link-section">
+                <h2 class="section-title">Initialize New Link</h2>
+                <form id="addLinkForm" onsubmit="handleAddLink(event)">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="url">URL</label>
+                        <input type="url" id="url" name="url" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <input type="text" id="category" name="category" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="privacy">Access Level</label>
+                        <select id="privacy" name="privacy" class="form-control" required>
+                            <option value="private">Restricted Access</option>
+                            <option value="public">Public Access</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Initialize Link</button>
+                </form>
+            </div>
+
+            <div class="links-section">
+                <h2 class="section-title">Link Database</h2>
+                <div id="linksList" class="links-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Logout function
+        function logout() {
+            document.cookie = 'access_token_cookie=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = '/';
+        }
+
+        // Handle adding new link
+        async function handleAddLink(event) {
+            event.preventDefault();
+            const form = event.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.textContent = 'Initializing...';
+            submitButton.disabled = true;
+
+            const data = {
+                title: form.title.value,
+                url: form.url.value,
+                category: form.category.value,
+                privacy: form.privacy.value
+            };
+
+            try {
+                const response = await fetch('/save_link', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    form.reset();
+                    loadLinks();
+                    showNotification('Link initialized successfully!', 'success');
+                } else {
+                    const error = await response.json();
+                    showNotification(error.msg || 'Initialization failed', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('System error occurred', 'error');
+            } finally {
+                submitButton.textContent = 'Initialize Link';
+                submitButton.disabled = false;
+            }
+        }
+
+        // Load user's links
+        async function loadLinks() {
+            const linksList = document.getElementById('linksList');
+            linksList.innerHTML = '<div class="loading-state">Synchronizing Database</div>';
+
+            try {
+                const response = await fetch('/get_links', {
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const links = await response.json();
+                    displayLinks(links);
+                } else {
+                    const error = await response.json();
+                    console.error('Error loading links:', error);
+                    showNotification('Failed to load links', 'error');
+                    linksList.innerHTML = `
+                        <div class="empty-state">
+                            <p>Failed to load links.</p>
+                            <p>Please try again later.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('System error occurred', 'error');
+                linksList.innerHTML = `
+                    <div class="empty-state">
+                        <p>Connection error.</p>
+                        <p>Please check your network and try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display links in the UI
+        function displayLinks(links) {
+            const linksList = document.getElementById('linksList');
+            if (!links || links.length === 0) {
+                linksList.innerHTML = `
+                    <div class="empty-state">
+                        <p>No links initialized in the database.</p>
+                        <p>Use the form to add your first link.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const linksHtml = links.map((link, index) => `
+                <div class="link-card" style="animation-delay: ${index * 0.1}s">
+                    <h3>${link.title}</h3>
+                    <a href="${link.url}" target="_blank">${link.url}</a>
+                    <div class="link-meta">
+                        <span>Category: ${link.category}</span>
+                        <span>Access: ${link.privacy}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            linksList.innerHTML = linksHtml;
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            // Force a reflow to restart the animation
+            notification.offsetHeight;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Load links when page loads
+        loadLinks();
+    </script>
+</body>
+</html>
