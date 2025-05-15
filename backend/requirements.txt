@@ -1,8 +1,9 @@
-Flask
-Flask-PyMongo
-Flask-Bcrypt
-Flask-JWT-Extended
-Flask-Mail
-Flask-CORS
-python-dotenv
+flask==2.2.3
+flask-pymongo==2.3.0
+flask-bcrypt==1.0.1
+flask-jwt-extended==4.5.2
+flask-mail==0.9.1
+flask-cors==4.0.0
+pymongo==4.3.3
+python-dotenv==1.0.0
 gunicorn

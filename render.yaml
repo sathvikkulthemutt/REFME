@@ -3,7 +3,7 @@ services:
     name: refme-backend
     env: python
     buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && gunicorn app:app
+    startCommand: cd backend && gunicorn refme_app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
@@ -11,6 +11,18 @@ services:
         sync: false
       - key: JWT_SECRET_KEY
         sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        sync: false
+      - key: PORT
+        value: 10000
       - key: FRONTEND_URL
         sync: false
 
@@ -21,4 +33,7 @@ services:
     routes:
       - type: rewrite
         source: /*
-        destination: /index.html 
+        destination: /index.html
+    envVars:
+      - key: BACKEND_URL
+        sync: false 

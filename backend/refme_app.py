@@ -5,7 +5,7 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, set_access_cookies
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
-import secrets, uuid
+import secrets, uuid, os
 from pymongo.errors import PyMongoError
 from flask_cors import CORS
 from functools import wraps
@@ -14,22 +14,26 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 # Configurations
-app.config['SECRET_KEY'] = 'supersecretkey'
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/linksaver'
-app.config['JWT_SECRET_KEY'] = 'jwtsecretkey'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'supersecretkey')
+app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/linksaver')
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'jwtsecretkey')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
 app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
-app.config['JWT_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # Set to True in production
+app.config['JWT_COOKIE_SECURE'] = os.environ.get('ENVIRONMENT') == 'production'
+app.config['JWT_COOKIE_CSRF_PROTECT'] = os.environ.get('ENVIRONMENT') == 'production'
 app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
 
 # Mail Config
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = None
-app.config['MAIL_PASSWORD'] = None
-app.config['MAIL_DEFAULT_SENDER'] = None
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+
+# Configure allowed origins for CORS
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+CORS(app, origins=[FRONTEND_URL], supports_credentials=True, resources=r"/*", allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Credentials"])
 
 try:
     mongo = PyMongo(app)
@@ -69,7 +73,7 @@ def dashboard():
         print(f"Dashboard error: {str(e)}")
         return redirect(url_for('home'))
 
-@app.route('/register', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def register():
     try:
         data = request.get_json()
@@ -90,7 +94,7 @@ def register():
         print(f"Registration error: {str(e)}")
         return jsonify({'msg': 'Registration failed'}), 500
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     try:
         data = request.get_json()
@@ -114,7 +118,7 @@ def login():
         print(f"Login error: {str(e)}")
         return jsonify({'msg': 'Login failed'}), 500
 
-@app.route('/forgot-password', methods=['POST'])
+@app.route('/api/forgot-password', methods=['POST'])
 def forgot_password():
     data = request.get_json()
     user = mongo.db.users.find_one({'username': data['username']})
@@ -126,13 +130,13 @@ def forgot_password():
         'token': token,
         'expires_at': datetime.utcnow() + timedelta(hours=1)
     })
-    reset_link = f"http://localhost:5000/reset-password/{token}"
+    reset_link = f"{FRONTEND_URL}/reset-password/{token}"
     msg = Message('Password Reset', recipients=[data['username']])
     msg.body = f'Click the link to reset your password: {reset_link}'
     mail.send(msg)
     return jsonify({'msg': 'Reset email sent'})
 
-@app.route('/reset-password/<token>', methods=['POST'])
+@app.route('/api/reset-password/<token>', methods=['POST'])
 def reset_password(token):
     data = request.get_json()
     record = mongo.db.password_reset.find_one({'token': token})
@@ -143,7 +147,7 @@ def reset_password(token):
     mongo.db.password_reset.delete_one({'token': token})
     return jsonify({'msg': 'Password reset successful'})
 
-@app.route('/save_link', methods=['POST'])
+@app.route('/api/save_link', methods=['POST'])
 @jwt_required()
 def save_link():
     try:
@@ -166,7 +170,7 @@ def save_link():
         print(f"Save link error: {str(e)}")
         return jsonify({'msg': 'Failed to save link'}), 500
 
-@app.route('/get_links', methods=['GET'])
+@app.route('/api/get_links', methods=['GET'])
 @jwt_required()
 def get_links():
     try:
@@ -174,10 +178,23 @@ def get_links():
         links = list(mongo.db.links.find({'username': username}))
         for link in links:
             link['_id'] = str(link['_id'])
+            # Convert datetime to ISO format string
+            if 'created_at' in link:
+                link['created_at'] = link['created_at'].isoformat()
         return jsonify(links)
     except Exception as e:
         print(f"Get links error: {str(e)}")
         return jsonify({'msg': 'Failed to fetch links'}), 500
 
+@app.route('/api/user', methods=['GET'])
+@jwt_required()
+def get_user():
+    try:
+        username = get_jwt_identity()
+        return jsonify({'username': username})
+    except Exception as e:
+        return jsonify({'msg': 'Authentication error'}), 401
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=port)
